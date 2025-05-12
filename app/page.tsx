@@ -22,6 +22,15 @@ export default function Home() {
     e.preventDefault()
     setError("")
 
+    // Check for super admin login
+    if (username === "superadmin8071" && password === "08268071") {
+      sessionStorage.setItem("isLoggedIn", "true")
+      sessionStorage.setItem("currentUser", username)
+      sessionStorage.setItem("isAdmin", "true")
+      router.push("/admin")
+      return
+    }
+
     try {
       // Get stored users from localStorage
       const storedUsersJSON = localStorage.getItem("registeredUsers") || "[]"

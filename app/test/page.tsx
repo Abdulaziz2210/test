@@ -5,20 +5,11 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Maximize, Minimize, ArrowRight, Play, Pause } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { ArrowRight, ArrowLeft } from "lucide-react"
 
 type TestSection = "reading" | "listening" | "writing"
 type ReadingPassage = 1 | 2 | 3
+type WritingTask = 1 | 2
 
 type TimerConfig = {
   reading: number
@@ -81,6 +72,84 @@ const audioLoadingStyles = `
   }
 `
 
+// Task 2 writing topics
+const writingTask2Topics = [
+  "Some people believe that universities should focus on providing academic skills, while others think that universities should prepare students for their future careers. Discuss both views and give your opinion.",
+  "In many countries, the amount of crime committed by teenagers is increasing. What are the causes of this, and what solutions can you suggest?",
+  "Some people think that the government should provide free healthcare for all citizens. Others believe that individuals should pay for their own healthcare. Discuss both views and give your opinion.",
+  "Some people think that children should be taught how to manage money at school. Others believe that this is the responsibility of parents. Discuss both views and give your opinion.",
+  "Some people believe that technology has made our lives too complex and that we should return to a simpler way of life. To what extent do you agree or disagree?",
+  "Some people think that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.",
+  "Some people think that all university students should study whatever they like. Others believe that they should only be allowed to study subjects that will be useful in the future, such as those related to science and technology. Discuss both views and give your opinion.",
+  "Some people think that governments should spend money on measures to save languages with few speakers from dying out completely. Others think this is a waste of financial resources. Discuss both views and give your opinion.",
+  "Some people think that the increasing use of computers and mobile phones for communication has had a negative effect on young people's reading and writing skills. To what extent do you agree or disagree?",
+  "Some people think that the government should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your opinion.",
+  "Some people think that the teenage years are the happiest times of most people's lives. Others think that adult life brings more happiness, in spite of greater responsibilities. Discuss both views and give your opinion.",
+  "Some people think that parents should teach children how to be good members of society. Others, however, believe that school is the place to learn this. Discuss both views and give your opinion.",
+  "Some people think that the main purpose of schools is to turn children into good citizens and workers, rather than to benefit them as individuals. To what extent do you agree or disagree?",
+  "Some people think that the main environmental problem facing by the world is the loss of particular species of plants and animals. Others believe that there are more important environmental problems. Discuss both views and give your opinion.",
+  "Some people think that the best way to solve global environmental problems is to increase the cost of fuel. To what extent do you agree or disagree?",
+  "Some people think that schools should select students according to their academic abilities, while others believe that it is better to have students with different abilities studying together. Discuss both views and give your opinion.",
+  "Some people think that the government is wasting money on the arts and that this money could be better spent elsewhere. To what extent do you agree or disagree?",
+  "Some people think that all young people should be required to have full-time education until they are at least 18 years old. To what extent do you agree or disagree?",
+  "Some people think that in order to prevent illness and disease, governments should make efforts in reducing environmental pollution and housing problems. To what extent do you agree or disagree?",
+  "Some people think that the increasing business and cultural contact between countries brings many positive effects. Others say that it causes the loss of national identities. Discuss both sides and give your opinion.",
+  "Some people think that young people should be required to do unpaid work helping people in the community. To what extent do you agree or disagree?",
+  "Some people think that the news media nowadays have influenced people's lives in negative ways. To what extent do you agree or disagree?",
+  "Some people think that robots are very important for humans' future development. Others, however, think that robots are a dangerous invention that could have negative effects on society. Discuss both views and give your opinion.",
+  "Some people think that the government should provide assistance to all kinds of artists including painters, musicians and poets. Others think that it is a waste of money. Discuss both views and give your opinion.",
+  "Some people think that the government should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your opinion.",
+  "Some people think that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.",
+  "Some people think that children should begin their formal education at a very early age and should spend most of their time studying. Others believe that young children should spend most of their time playing. Discuss both views and give your opinion.",
+  "Some people think that it is better to educate boys and girls in separate schools. Others, however, believe that boys and girls benefit more from attending mixed schools. Discuss both views and give your opinion.",
+  "Some people think that the government should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your opinion.",
+  "Some people think that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.",
+  "Some people think that the government should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your opinion.",
+  "Some people think that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.",
+  "Some people think that the government should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your opinion.",
+  "Some people think that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.",
+  "Some people think that the government should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your opinion.",
+  "Some people think that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.",
+  "Some people think that the government should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your opinion.",
+  "Some people think that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime. Discuss both views and give your opinion.",
+  "Some people think that the government should ban dangerous sports, while others think people should have freedom to do any sports or activity. Discuss both views and give your opinion.",
+  "Some people think that the best way to reduce crime is to give longer prison sentences. Others, however, believe there are better alternative ways of reducing crime.",
+]
+
+// Task 1 chart images
+const task1Images = [
+  {
+    id: 1,
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/chart1-JrRCRZzDfFv252b12m5ocFfm9gCmj1.png",
+    description: "CO2 emissions per person in the UK, Sweden, Italy, and Portugal from 1967-2007",
+  },
+  {
+    id: 2,
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/chart2-yUaZPrzLnGqFDg49iHN1Ag3m4nPFMA.png",
+    description: "Men and women in further education in Britain across three time periods",
+  },
+  {
+    id: 3,
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/chart3-CqwkiSOD6M806e18bOZ3wtwi4T0Ckh.png",
+    description: "Maps showing changes in the town of Springer from 1970 until now",
+  },
+  {
+    id: 4,
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/chart4-0LRxqfXNdXWtwN65wdgopqBJFcGvVl.png",
+    description: "Diagram showing the recycling process of aluminum drink cans",
+  },
+  {
+    id: 5,
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/chart5-z4eWtTy3yauEr6UOrcPLkGiKPHmqeq.png",
+    description: "Pie charts showing age demographics in Oman and Spain in 2005 and projections for 2055",
+  },
+  {
+    id: 6,
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/chart6-DXAPPZN9Hnfcak5TlpqjzgH8z5hFsH.png",
+    description: "Table showing data about underground railway systems in six major cities",
+  },
+]
+
 export default function TestPage() {
   const { t } = useLanguage()
   const searchParams = useSearchParams()
@@ -103,6 +172,13 @@ export default function TestPage() {
   const [showFinishConfirmation, setShowFinishConfirmation] = useState<boolean>(false)
   const [isAudioLoaded, setIsAudioLoaded] = useState<boolean>(false)
   const [isAudioLoading, setIsAudioLoading] = useState<boolean>(false)
+  const [currentWritingTask, setCurrentWritingTask] = useState<WritingTask>(1)
+  const [selectedTask1Image, setSelectedTask1Image] = useState<number>(0)
+  const [selectedTask2Topic, setSelectedTask2Topic] = useState<number>(0)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false)
+  const [testTakers, setTestTakers] = useState<any[]>([])
+  const [isAnnotationMode, setIsAnnotationMode] = useState<boolean>(false)
+  const writingContentRef = useRef<HTMLDivElement>(null)
 
   // Reading test answers - 40 questions
   const [readingAnswers, setReadingAnswers] = useState<string[]>(Array(40).fill(""))
@@ -243,6 +319,14 @@ export default function TestPage() {
       router.push("/")
     } else {
       setCurrentUser(user)
+
+      // Check if user is admin
+      if (user === "superadmin8071") {
+        setIsAdmin(true)
+        // Fetch test takers
+        const testTakers = JSON.parse(localStorage.getItem("registeredUsers") || "[]")
+        setTestTakers(testTakers)
+      }
     }
   }, [router])
 
@@ -289,6 +373,19 @@ export default function TestPage() {
     }
   }, [])
 
+  // Randomly select Task 1 image and Task 2 topic when test starts
+  useEffect(() => {
+    if (isTestActive) {
+      // Random Task 1 image (1-6)
+      const randomImageIndex = Math.floor(Math.random() * 6) + 1
+      setSelectedTask1Image(randomImageIndex)
+
+      // Random Task 2 topic
+      const randomTopicIndex = Math.floor(Math.random() * writingTask2Topics.length)
+      setSelectedTask2Topic(randomTopicIndex)
+    }
+  }, [isTestActive])
+
   const startTest = () => {
     setIsTestActive(true)
   }
@@ -299,9 +396,21 @@ export default function TestPage() {
     }
   }
 
+  const handlePreviousPassage = () => {
+    if (currentPassage > 1) {
+      setCurrentPassage((prev) => (prev - 1) as ReadingPassage)
+    }
+  }
+
   const handleNextListeningSection = () => {
     if (currentListeningSection < 4) {
       setCurrentListeningSection(currentListeningSection + 1)
+    }
+  }
+
+  const handlePreviousListeningSection = () => {
+    if (currentListeningSection > 1) {
+      setCurrentListeningSection(currentListeningSection - 1)
     }
   }
 
@@ -335,20 +444,6 @@ export default function TestPage() {
 
       // Test is complete - send results
       finishTest()
-    }
-  }
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      if (fullscreenContainerRef.current?.requestFullscreen) {
-        fullscreenContainerRef.current.requestFullscreen().catch((err) => {
-          console.error(`Error attempting to enable fullscreen: ${err.message}`)
-        })
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen()
-      }
     }
   }
 
@@ -493,6 +588,9 @@ export default function TestPage() {
         listeningAnswers,
         writingAnswer1,
         writingAnswer2,
+        currentWritingTask,
+        selectedTask1Image,
+        selectedTask2Topic,
         timestamp: Date.now(),
       }
       localStorage.setItem("ieltsTestState", JSON.stringify(testState))
@@ -507,6 +605,9 @@ export default function TestPage() {
     listeningAnswers,
     writingAnswer1,
     writingAnswer2,
+    currentWritingTask,
+    selectedTask1Image,
+    selectedTask2Topic,
   ])
 
   // Restore test state on component mount
@@ -529,6 +630,9 @@ export default function TestPage() {
         setListeningAnswers(parsedState.listeningAnswers)
         setWritingAnswer1(parsedState.writingAnswer1 || "")
         setWritingAnswer2(parsedState.writingAnswer2 || "")
+        setCurrentWritingTask(parsedState.currentWritingTask || 1)
+        setSelectedTask1Image(parsedState.selectedTask1Image || 1)
+        setSelectedTask2Topic(parsedState.selectedTask2Topic || 0)
         setIsTestActive(true)
       } catch (error) {
         console.error("Error restoring test state:", error)
@@ -550,15 +654,19 @@ export default function TestPage() {
       const task1Words = writingAnswer1.split(/\s+/).filter((word) => word.length > 0).length
       const task2Words = writingAnswer2.split(/\s+/).filter((word) => word.length > 0).length
 
+      // Define total questions for reading and listening
+      const readingTotal = correctReadingAnswers.length
+      const listeningTotal = correctListeningAnswers.length
+
       const results = {
         student: currentUser,
         readingScore,
-        readingTotal: correctReadingAnswers.length,
-        readingPercentage: Math.round((readingScore / correctReadingAnswers.length) * 100),
+        readingTotal,
+        readingPercentage: Math.round((readingScore / readingTotal) * 100),
         readingBand: readingBandScore,
         listeningScore,
-        listeningTotal: correctListeningAnswers.length,
-        listeningPercentage: Math.round((listeningScore / correctListeningAnswers.length) * 100),
+        listeningTotal,
+        listeningPercentage: Math.round((listeningScore / listeningTotal) * 100),
         listeningBand: listeningBandScore,
         writingTask1: writingAnswer1 || "No response provided",
         writingTask1Words: task1Words,
@@ -669,21 +777,22 @@ Task 2: ${task2Words} words
     ).length
   }
 
+  const toggleAnnotationMode = () => {
+    setIsAnnotationMode(!isAnnotationMode)
+  }
+
   const renderReadingSection = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold">Reading Passage {currentPassage}</h3>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={toggleFullscreen}>
-            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-            <span className="ml-2">{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
-          </Button>
+          {/* No annotation tools in reading section */}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Passage on the left */}
-        <div className="p-4 border rounded-md h-[600px] overflow-y-auto">
+        <div className="p-4 border rounded-md h-[600px] overflow-y-auto relative">
           <div className="prose dark:prose-invert max-w-none">
             {currentPassage === 1 && (
               <>
@@ -945,7 +1054,7 @@ Task 2: ${task2Words} words
         </div>
 
         {/* Questions on the right */}
-        <div className="p-4 border rounded-md h-[600px] overflow-y-auto">
+        <div className="p-4 border rounded-md h-[600px] overflow-y-auto relative">
           <div className="space-y-6 text-lg">
             {currentPassage === 1 && (
               <>
@@ -1628,7 +1737,15 @@ Task 2: ${task2Words} words
         </div>
       </div>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-between mt-4">
+        {currentPassage > 1 ? (
+          <Button onClick={handlePreviousPassage}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Previous Passage
+          </Button>
+        ) : (
+          <div></div> // Empty div to maintain flex spacing
+        )}
+
         {currentPassage < 3 ? (
           <Button onClick={handleNextPassage}>
             Next Passage <ArrowRight className="ml-2 h-4 w-4" />
@@ -1647,14 +1764,7 @@ Task 2: ${task2Words} words
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold">Listening Section {currentListeningSection}</h3>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={toggleAudio}>
-            {isAudioPlaying ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-            {isAudioPlaying ? "Pause Audio" : "Play Audio"}
-          </Button>
-          <Button variant="outline" size="sm" onClick={toggleFullscreen}>
-            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-            <span className="ml-2">{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
-          </Button>
+          {/* No annotation tools in listening section */}
         </div>
       </div>
 
@@ -1692,7 +1802,7 @@ Task 2: ${task2Words} words
       )}
 
       {(!isAudioLoading || isAudioLoaded) && (
-        <div className="p-4 border rounded-md w-full">
+        <div className="p-4 border rounded-md w-full relative">
           <div className="space-y-6 text-lg">
             {currentListeningSection === 1 && (
               <>
@@ -2236,206 +2346,6 @@ Task 2: ${task2Words} words
                       className="mt-2"
                     />
                   </div>
-                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-md">
-                    <p className="text-lg">Local industry closed due to 34 ...........................</p>
-                    <Input
-                      value={listeningAnswers[33]}
-                      onChange={(e) => handleListeningAnswerChange(33, e.target.value)}
-                      placeholder="Answer"
-                      className="mt-2"
-                    />
-                  </div>
-                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-md">
-                    <p className="text-lg">
-                      <strong>Possible solutions:</strong>
-                    </p>
-                  </div>
-                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-md">
-                    <p className="text-lg">Plant 35 ...........................</p>
-                    <Input
-                      value={listeningAnswers[34]}
-                      onChange={(e) => handleListeningAnswerChange(34, e.target.value)}
-                      placeholder="Answer"
-                      className="mt-2"
-                    />
-                  </div>
-                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-md">
-                    <p className="text-lg">Use 36 ........................... paint</p>
-                    <Input
-                      value={listeningAnswers[35]}
-                      onChange={(e) => handleListeningAnswerChange(35, e.target.value)}
-                      placeholder="Answer"
-                      className="mt-2"
-                    />
-                  </div>
-                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-md">
-                    <p className="text-lg">Create a 37 ...........................</p>
-                    <Input
-                      value={listeningAnswers[36]}
-                      onChange={(e) => handleListeningAnswerChange(36, e.target.value)}
-                      placeholder="Answer"
-                      className="mt-2"
-                    />
-                  </div>
-                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-md">
-                    <p className="text-lg">Find a 38 ........................... supply</p>
-                    <Input
-                      value={listeningAnswers[37]}
-                      onChange={(e) => handleListeningAnswerChange(37, e.target.value)}
-                      placeholder="Answer"
-                      className="mt-2"
-                    />
-                  </div>
-                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-md">
-                    <p className="text-lg">Introduce a new type of 39 ...........................</p>
-                    <Input
-                      value={listeningAnswers[38]}
-                      onChange={(e) => handleListeningAnswerChange(38, e.target.value)}
-                      placeholder="Answer"
-                      className="mt-2"
-                    />
-                  </div>
-                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-md">
-                    <p className="text-lg">Wait for a 40 ...........................</p>
-                    <Input
-                      value={listeningAnswers[39]}
-                      onChange={(e) => handleListeningAnswerChange(39, e.target.value)}
-                      placeholder="Answer"
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                  <div className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-m
 
-      <div className="flex justify-end mt-4">
-        {currentListeningSection < 4 ? (
-          <Button onClick={handleNextListeningSection}>
-            Next Section <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        ) : (
-          <Button onClick={handleSectionComplete}>
-            Next Section <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    </div>
-  )
-
-  const renderWritingSection = () => (
-    <div className="space-y-6">
-      <h3 className="text-xl font-bold mb-4">Writing Test</h3>
-
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold">Task 1:</h4>
-        <p>
-          You should spend about 20 minutes on this task.
-          <br />
-          Summarise the information by selecting and reporting the main features, and make comparisons where relevant.
-        </p>
-        <textarea
-          value={writingAnswer1}
-          onChange={(e) => setWritingAnswer1(e.target.value)}
-          placeholder="Write your answer here..."
-          className="w-full h-48 p-4 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-        />
-      </div>
-
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold">Task 2:</h4>
-        <p>
-          You should spend about 40 minutes on this task.
-          <br />
-          Write about the following topic:
-        </p>
-        <textarea
-          value={writingAnswer2}
-          onChange={(e) => setWritingAnswer2(e.target.value)}
-          placeholder="Write your answer here..."
-          className="w-full h-48 p-4 border rounded-md dark:bg-gray-800 dark:border-gray-700"
-        />
-      </div>
-
-      <div className="flex justify-end mt-4">
-        <Button onClick={handleSectionComplete}>
-          End the Test <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  )
-
-  return (
-    <div
-      className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300"
-      ref={fullscreenContainerRef}
-    >
-      <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-8">IELTS Test</h1>
-
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-lg">
-            {isTestActive ? (
-              <>
-                Time Remaining: <span className="font-semibold">{formatTime(timeRemaining)}</span>
-              </>
-            ) : (
-              "Ready to start the test"
-            )}
-          </div>
-
-          <div>
-            {isTestActive && (
-              <Button variant="destructive" onClick={() => setShowFinishConfirmation(true)} disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Finish Test"}
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {submitError && <div className="text-red-500 mb-4">{submitError}</div>}
-
-        {!isTestActive && !isTestComplete && (
-          <div className="text-center">
-            <Button onClick={startTest}>Start Test</Button>
-          </div>
-        )}
-
-        {isTestComplete ? (
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-4">Test Complete!</h2>
-            <p className="text-lg">Thank you for completing the test. Your results have been submitted.</p>
-            <Button onClick={() => router.push("/")} className="mt-6">
-              Go to Home
-            </Button>
-          </div>
-        ) : (
-          <>
-            {currentSection === "reading" && renderReadingSection()}
-            {currentSection === "listening" && renderListeningSection()}
-            {currentSection === "writing" && renderWritingSection()}
-          </>
-        )}
-      </div>
-
-      <AlertDialog open={showFinishConfirmation} onOpenChange={setShowFinishConfirmation}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to finish the test?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. All your answers will be submitted and you will not be able to return to the
-              test.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={finishTest}>Yes, finish test</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <style jsx>{audioLoadingStyles}</style>
-    </div>
-  )
-}
+\
